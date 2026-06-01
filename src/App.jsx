@@ -2,11 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowUpRight, ExternalLink, Mail,
-  Code2, BarChart3, Brain, Zap, Check, ChevronDown,
+  Code2, BarChart3, Brain, Zap, Check, ChevronLeft, ChevronRight,
   Smartphone, Cpu, Database
 } from "lucide-react";
 
-const Github = ({ size = 24, ...props }) => (
+/* ─── Brand Icon Fallbacks (Since lucide-react v1.x doesn't include logos) ─── */
+const GithubIcon = ({ size = 20, ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}
@@ -24,7 +25,7 @@ const Github = ({ size = 24, ...props }) => (
   </svg>
 );
 
-const Linkedin = ({ size = 24, ...props }) => (
+const LinkedinIcon = ({ size = 20, ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}
@@ -43,474 +44,7 @@ const Linkedin = ({ size = 24, ...props }) => (
   </svg>
 );
 
-/* ─── Global Styles ─── */
-const FontLink = () => (
-  <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@700;800&display=swap');
-    
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body { background: #000; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #000; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
-
-    .heading { font-family: 'Space Grotesk', sans-serif; }
-    .display { font-family: 'Playfair Display', serif; }
-    .label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.3em; color: rgba(255,255,255,0.45); }
-    .muted { color: rgba(255,255,255,0.55); }
-    
-    .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; }
-    .glass-sm { background: rgba(255,255,255,0.05); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; }
-    
-    .btn-glass {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 12px 28px;
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 100px;
-      font-size: 0.85rem; font-weight: 500; color: #fff;
-      cursor: pointer; transition: all 0.3s ease;
-      font-family: 'Space Grotesk', sans-serif;
-    }
-    .btn-glass:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.4); }
-    
-    .btn-white {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 14px 32px;
-      background: #fff; color: #000;
-      border-radius: 100px; font-weight: 600; cursor: pointer;
-      transition: all 0.3s ease; font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.9rem; border: none;
-    }
-    .btn-white:hover { background: rgba(255,255,255,0.85); transform: translateY(-2px); }
-
-    .status-pulse {
-      display: inline-block; width: 8px; height: 8px;
-      background: #4ade80; border-radius: 50%;
-      animation: pulse 2s ease-in-out infinite;
-    }
-    @keyframes pulse { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(74,222,128,0.7); } 70% { box-shadow: 0 0 0 8px rgba(74,222,128,0); } }
-
-    .project-card {
-      position: relative; overflow: hidden; border-radius: 12px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-    .project-card:hover { border-color: rgba(255,255,255,0.15); }
-    .project-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
-    .project-card:hover .project-image img { transform: scale(1.05); }
-
-    @keyframes grain {
-      0%, 100% { transform: translate(0,0); }
-      50% { transform: translate(12%,9%); }
-    }
-    .grain::before {
-      content: '';
-      position: fixed; inset: -200%;
-      width: 400%; height: 400%;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.75' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none; z-index: 999; opacity: 0.4;
-      animation: grain 8s steps(10) infinite;
-    }
-
-    .letter-reveal { display: inline-block; }
-    
-    @media (max-width: 768px) {
-      .hidden-mobile { display: none !important; }
-      .show-mobile { display: block !important; }
-    }
-  `}</style>
-);
-
-/* ─── Animated Text ─── */
-function AnimatedHeading({ text, staggerDelay = 0.03 }) {
-  return (
-    <span>
-      {text.split("").map((char, i) => (
-        <motion.span
-          key={i}
-          className="letter-reveal"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: i * staggerDelay, duration: 0.6, ease: "easeOut" }}
-        >
-          {char}
-        </motion.span>
-      ))}
-    </span>
-  );
-}
-
-/* ─── Reveal ─── */
-function Reveal({ children, delay = 0, y = 40 }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.75, ease: "easeOut", delay }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-/* ─── Navbar ─── */
-function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return (
-    <motion.nav
-      initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
-      style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-        padding: "0 48px",
-        transition: "all 0.4s ease",
-        background: scrolled ? "rgba(0,0,0,0.85)" : "transparent",
-        backdropFilter: scrolled ? "blur(24px)" : "none",
-        borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "none",
-      }}
-    >
-      <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 72 }}>
-        <div className="heading" style={{ fontSize: "1.2rem", fontWeight: 700, letterSpacing: "0.05em" }}>J.S</div>
-        
-        <div style={{ display: "flex", gap: 48, alignItems: "center" }} className="hidden-mobile">
-          {["Work","About","Services","Contact"].map(l => (
-            <a key={l} href={'#' + l.toLowerCase()} style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.65)", textDecoration: "none", letterSpacing: "0.04em", transition: "color 0.2s" }}
-              onMouseEnter={e => e.target.style.color="#fff"}
-              onMouseLeave={e => e.target.style.color="rgba(255,255,255,0.65)"}
-            >{l}</a>
-          ))}
-        </div>
-
-        <a href="mailto:l0cjanarthansrvspm@gmail.com" className="btn-glass">
-          <Mail size={15}/> Contact
-        </a>
-      </div>
-    </motion.nav>
-  );
-}
-
-/* ─── Hero ─── */
-function Hero() {
-  const roles = [
-    { title: "Android Developer", icon: <Smartphone size={16} /> },
-    { title: "Full-Stack Engineer", icon: <Cpu size={16} /> },
-    { title: "Data Science Enthusiast", icon: <Database size={16} /> }
-  ];
-  const [currentRole, setCurrentRole] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentRole(p => (p + 1) % roles.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <section id="work" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "180px 48px 80px", position: "relative" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto", width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center" }}>
-        {/* Left */}
-        <Reveal>
-          <div>
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}
-            >
-              <span className="status-pulse"/>
-              <span className="label">Available for Projects</span>
-            </motion.div>
-
-            <div style={{ marginBottom: 32 }}>
-              <div className="label" style={{ marginBottom: 12 }}>Hi, my name is</div>
-              <h1 className="display" style={{ fontSize: "clamp(2.5rem,6vw,4.5rem)", fontWeight: 700, lineHeight: 1.1, marginBottom: 20 }}>
-                <AnimatedHeading text="Janarthan S" staggerDelay={0.05}/>
-              </h1>
-            </div>
-
-            <div style={{ display: "flex", gap: 40, marginBottom: 48 }}>
-              {roles.map((role, i) => (
-                <motion.div
-                  key={role.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: currentRole === i ? 1 : 0.3, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <div className="label" style={{ marginBottom: 8, display: "flex", alignItems: "center", gap: 8, color: "#fff" }}>
-                    {role.icon} 0{i + 1}
-                  </div>
-                  <div style={{ fontSize: "0.9rem", fontWeight: 500, whiteSpace: "nowrap" }}>{role.title}</div>
-                </motion.div>
-              ))}
-            </div>
-
-            <Reveal delay={0.2}>
-              <a href="mailto:l0cjanarthansrvspm@gmail.com" className="btn-white">
-                Get In Touch <ArrowUpRight size={16}/>
-              </a>
-            </Reveal>
-
-            <Reveal delay={0.3}>
-              <div style={{ display: "flex", gap: 24, marginTop: 48 }}>
-                {[
-                  { icon: <Github size={18}/>, href: "https://github.com/Jana-06", label: "GitHub" },
-                  { icon: <Linkedin size={18}/>, href: "https://linkedin.com/in/janarthan-s-8476b81b5", label: "LinkedIn" },
-                  { icon: <ExternalLink size={18}/>, href: "https://portfoliojanarthanx.vercel.app", label: "Portfolio" },
-                ].map((s, i) => (
-                  <motion.a
-                    key={s.label}
-                    href={s.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="glass-sm"
-                    style={{ padding: "12px 18px", display: "flex", alignItems: "center", gap: 8, color: "#fff", textDecoration: "none" }}
-                    whileHover={{ 
-                      scale: 1.1, 
-                      borderColor: "rgba(255,255,255,0.5)",
-                      boxShadow: "0 0 20px rgba(255,255,255,0.2)",
-                      backgroundColor: "rgba(255,255,255,0.1)"
-                    }}
-                  >
-                    {s.icon}
-                  </motion.a>
-                ))}
-              </div>
-            </Reveal>
-          </div>
-        </Reveal>
-
-        {/* Right - Code */}
-        <Reveal delay={0.2}>
-          <div className="glass" style={{ padding: "32px", fontFamily: "monospace", fontSize: "0.8rem", lineHeight: 1.8 }}>
-            <div style={{ color: "rgba(100,200,150,0.8)" }}>{"// Core Stack"}</div>
-            <div style={{ color: "#fff", marginTop: 8 }}>{"const janarthan = {"}</div>
-            <div style={{ paddingLeft: 16 }}>
-              <div>skills: <span style={{ color: "#4ade80" }}>["React","Python","Flutter","ML"]</span></div>
-              <div>stack: <span style={{ color: "#4ade80" }}>["Framer Motion","TensorFlow","FastAPI"]</span></div>
-              <div>github: <span style={{ color: "#4ade80" }}>"Jana-06"</span></div>
-            </div>
-            <div style={{ color: "#fff" }}>{"}"}</div>
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-/* ─── About / Services ─── */
-function About() {
-  const services = [
-    { icon: <Code2 size={20}/>, title: "Full-Stack Development", desc: "React, Node.js, Firebase, PostgreSQL — production-ready applications" },
-    { icon: <BarChart3 size={20}/>, title: "Data Science & ML", desc: "Python, TensorFlow, XGBoost — predictive models & recommendation engines" },
-    { icon: <Zap size={20}/>, title: "Mobile Development", desc: "Flutter, Kotlin, Android — cross-platform apps with native feel" },
-    { icon: <Brain size={20}/>, title: "AI/ML Integration", desc: "LLMs, Scikit-learn, anomaly detection — intelligent feature engineering" },
-  ];
-
-  return (
-    <section id="about" style={{ padding: "100px 48px", position: "relative" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <Reveal>
-          <div style={{ marginBottom: 80 }}>
-            <div className="label" style={{ marginBottom: 16 }}>What I Do</div>
-            <h2 className="display" style={{ fontSize: "clamp(2rem,5vw,4rem)", fontWeight: 700, lineHeight: 1.1 }}>
-              Design ● Build ● Deploy
-            </h2>
-          </div>
-        </Reveal>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 24 }}>
-          {services.map((s, i) => (
-            <Reveal key={s.title} delay={i * 0.1}>
-              <motion.div
-                className="glass"
-                style={{ padding: "40px" }}
-                whileHover={{ y: -6, borderColor: "rgba(255,255,255,0.25)" }}
-              >
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
-                  {s.icon}
-                </div>
-                <h3 className="heading" style={{ fontSize: "1.1rem", fontWeight: 600, marginBottom: 8 }}>{s.title}</h3>
-                <p className="muted" style={{ fontSize: "0.85rem", lineHeight: 1.7 }}>{s.desc}</p>
-              </motion.div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─── Projects ─── */
-function Projects() {
-  const projects = [
-    { num: "01", title: "Hack'n'Hunt", desc: "Event management platform with real-time Firebase sync", tech: "React • Node.js • Firebase" },
-    { num: "02", title: "Data Recommendation Engine", desc: "SmartCart ML system for personalized recommendations", tech: "Python • Scikit-learn • XGBoost" },
-    { num: "03", title: "Flutter E-Commerce App", desc: "Cross-platform mobile app with smooth animations", tech: "Flutter • Firebase • Kotlin" },
-    { num: "04", title: "Demand Forecasting Model", desc: "Time-series ML pipeline with 94%+ accuracy", tech: "Python • TensorFlow • SQL" },
-    { num: "05", title: "Portfolio Website", desc: "Premium animated landing page experience", tech: "React • Framer Motion • Tailwind" },
-  ];
-
-  return (
-    <section style={{ padding: "100px 48px", position: "relative" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <Reveal>
-          <div style={{ marginBottom: 80 }}>
-            <div className="label" style={{ marginBottom: 16 }}>Featured Work</div>
-            <h2 className="display" style={{ fontSize: "clamp(2rem,5vw,4rem)", fontWeight: 700, lineHeight: 1.1 }}>
-              The Artworks
-            </h2>
-          </div>
-        </Reveal>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 24 }}>
-          {projects.map((p, i) => (
-            <Reveal key={p.title} delay={i * 0.1}>
-              <motion.div
-                className="project-card"
-                style={{ padding: "24px", display: "flex", flexDirection: "column", gap: 20 }}
-                whileHover={{ borderColor: "rgba(255,255,255,0.25)" }}
-              >
-                <div style={{ width: "100%", height: 200, background: "rgba(255,255,255,0.04)", borderRadius: 8, overflow: "hidden" }}>
-                  <div style={{ width: "100%", height: "100%", background: `linear-gradient(135deg, rgba(${74 + i*20},${150 + i*10},${200 + i*5},0.1), rgba(255,255,255,0.02))`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <span style={{ fontSize: "3rem", opacity: 0.3 }}>📱</span>
-                  </div>
-                </div>
-                <div>
-                  <div className="label" style={{ marginBottom: 8 }}>{p.num}</div>
-                  <h3 className="heading" style={{ fontSize: "1.2rem", fontWeight: 600, marginBottom: 8 }}>{p.title}</h3>
-                  <p className="muted" style={{ fontSize: "0.85rem", lineHeight: 1.7, marginBottom: 16 }}>{p.desc}</p>
-                  <div className="label" style={{ color: "rgba(255,255,255,0.35)" }}>{p.tech}</div>
-                </div>
-              </motion.div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─── The Manifesto ─── */
-function Manifesto() {
-  const pillars = [
-    { num: "01", title: "MOTION THAT MATTERS", desc: "Animations serve purpose. Every frame tells a story. Framer Motion for production-grade experiences." },
-    { num: "02", title: "SCALABLE ARCHITECTURE", desc: "Clean code, solid design patterns. React hooks, TypeScript, modular components. Built for growth." },
-    { num: "03", title: "DATA-DRIVEN LOGIC", desc: "ML models powering intelligent features. Recommendations, anomaly detection, forecasting. Python × JavaScript." },
-    { num: "04", title: "FUTURE-READY AI", desc: "Exploring LLMs, vector databases, edge ML. The next frontier of intelligent applications." },
-  ];
-
-  return (
-    <section id="services" style={{ padding: "100px 48px", position: "relative" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <Reveal>
-          <div style={{ marginBottom: 80 }}>
-            <div className="label" style={{ marginBottom: 16 }}>Philosophy</div>
-            <h2 className="display" style={{ fontSize: "clamp(2rem,5vw,4rem)", fontWeight: 700, lineHeight: 1.1 }}>
-              The Manifesto
-            </h2>
-          </div>
-        </Reveal>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 24 }}>
-          {pillars.map((p, i) => (
-            <Reveal key={p.title} delay={i * 0.1}>
-              <motion.div
-                className="glass"
-                style={{ padding: "40px" }}
-                whileHover={{ y: -4, borderColor: "rgba(255,255,255,0.25)" }}
-              >
-                <div className="label" style={{ marginBottom: 12 }}>{p.num}</div>
-                <h3 className="heading" style={{ fontSize: "1.2rem", fontWeight: 700, marginBottom: 16, lineHeight: 1.3 }}>{p.title}</h3>
-                <p className="muted" style={{ fontSize: "0.85rem", lineHeight: 1.8 }}>{p.desc}</p>
-              </motion.div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─── CTA ─── */
-function CTA() {
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <section id="contact" style={{ padding: "100px 48px", position: "relative" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <Reveal>
-          <div className="glass" style={{ padding: "80px", textAlign: "center", borderRadius: 24 }}>
-            <div className="label" style={{ marginBottom: 24 }}>Ready to Collaborate?</div>
-            <h2 className="display" style={{ fontSize: "clamp(2rem,6vw,5rem)", fontWeight: 700, lineHeight: 1.1, marginBottom: 48 }}>
-              Let's Build Something Great
-            </h2>
-            <motion.a
-              href="mailto:l0cjanarthansrvspm@gmail.com"
-              className="btn-white"
-              style={{ padding: "16px 40px", fontSize: "1rem", display: "inline-flex" }}
-              onMouseEnter={() => setHovered(true)}
-              onMouseLeave={() => setHovered(false)}
-              whileTap={{ scale: 0.97 }}
-            >
-              Get In Touch
-              <motion.span animate={{ rotate: hovered ? 45 : 0 }} transition={{ duration: 0.25 }}>
-                <ArrowUpRight size={18}/>
-              </motion.span>
-            </motion.a>
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-/* ─── Footer ─── */
-function Footer() {
-  return (
-    <footer style={{ padding: "60px 48px 40px", borderTop: "1px solid rgba(255,255,255,0.06)", position: "relative" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 40, flexWrap: "wrap", gap: 24 }}>
-          <div>
-            <div className="heading" style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: 8 }}>Janarthan S</div>
-            <div className="label">Developer × Designer × Data Scientist</div>
-          </div>
-          <div style={{ display: "flex", gap: 32 }}>
-            <div>
-              <div className="label" style={{ marginBottom: 12 }}>Social</div>
-              {[
-                { label: "GitHub", href: "https://github.com/Jana-06" },
-                { label: "LinkedIn", href: "https://linkedin.com/in/janarthan-s-8476b81b5" },
-              ].map(s => (
-                <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" style={{ display: "block", fontSize: "0.85rem", color: "rgba(255,255,255,0.5)", textDecoration: "none", marginBottom: 6, transition: "color 0.2s" }}
-                  onMouseEnter={e => e.target.style.color="#fff"}
-                  onMouseLeave={e => e.target.style.color="rgba(255,255,255,0.5)"}
-                >{s.label}</a>
-              ))}
-            </div>
-          </div>
-        </div>
-        <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 24, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-          <div className="label">© 2026 Janarthan S. All rights reserved.</div>
-          <div className="label">Design ● Build ● Deploy</div>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-/* ─── Background Video ─── */
+/* ─── Continuous Cinematic Video Background ─── */
 const BackgroundVideo = () => (
   <div style={{ position: "fixed", inset: 0, zIndex: 0, overflow: "hidden" }}>
     <video
@@ -518,31 +52,790 @@ const BackgroundVideo = () => (
       loop
       muted
       playsInline
-      style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.8 }}
+      style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.7 }}
     >
       <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260212_043536_e0d3c69f-5c0c-4533-8395-fbe962587446.mp4" type="video/mp4" />
     </video>
-    <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 50% 50%, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 100%)", backdropFilter: "blur(2px)" }} />
+    <div style={{
+      position: "absolute",
+      inset: 0,
+      background: "radial-gradient(circle at 50% 50%, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.85) 100%)",
+      backdropFilter: "blur(2.5px)"
+    }} />
   </div>
 );
 
-/* ─── App ─── */
-export default function App() {
+/* ─── Animated Heading ─── */
+function AnimatedHeading({ text, staggerDelay = 0.04 }) {
   return (
-    <div style={{ background: "#000", minHeight: "100vh", position: "relative" }} className="grain">
-      <FontLink/>
+    <span>
+      {text.split("").map((char, i) => (
+        <motion.span
+          key={i}
+          className="letter-reveal"
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: i * staggerDelay, duration: 0.5, ease: "easeOut" }}
+        >
+          {char === " " ? "\u00A0" : char}
+        </motion.span>
+      ))}
+    </span>
+  );
+}
 
+/* ─── SLIDE 1: HERO & WELCOME ─── */
+function HeroSlide({ isActive }) {
+  const roles = [
+    { title: "Android Developer", icon: <Smartphone size={15} /> },
+    { title: "Full-Stack Engineer", icon: <Cpu size={15} /> },
+    { title: "Data Science Enthusiast", icon: <Database size={15} /> }
+  ];
+  
+  const [roleIndex, setRoleIndex] = useState(0);
+
+  useEffect(() => {
+    if (!isActive) return;
+    const interval = setInterval(() => {
+      setRoleIndex((prev) => (prev + 1) % roles.length);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [isActive]);
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: "60px", alignItems: "center", height: "100%", width: "100%" }}>
+      {/* Hero Left Content */}
+      <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={isActive ? { opacity: 1, x: 0 } : { opacity: 0 }}
+          transition={{ duration: 0.6 }}
+          style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}
+        >
+          <span className="status-pulse" />
+          <span className="label" style={{ color: "#4ade80" }}>Available for Freelance & Roles</span>
+        </motion.div>
+
+        <div style={{ marginBottom: 28 }}>
+          <span className="label" style={{ color: "rgba(255, 255, 255, 0.5)" }}>Hello, I'm</span>
+          <h1 className="display" style={{ fontSize: "clamp(2.5rem, 5vw, 4.2rem)", fontWeight: 800, marginTop: 8, lineHeight: 1.15 }}>
+            {isActive ? <AnimatedHeading text="Janarthan S" staggerDelay={0.06} /> : "Janarthan S"}
+          </h1>
+        </div>
+
+        {/* Dynamic Cycling Role */}
+        <div style={{ minHeight: "60px", marginBottom: 32 }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={roleIndex}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.35 }}
+              style={{ display: "flex", alignItems: "center", gap: 10 }}
+            >
+              <div style={{ color: "#c084fc", display: "flex", alignItems: "center" }}>
+                {roles[roleIndex].icon}
+              </div>
+              <span className="heading" style={{ fontSize: "1.25rem", fontWeight: 500, color: "rgba(255,255,255,0.9)" }}>
+                {roles[roleIndex].title}
+              </span>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <p className="muted" style={{ fontSize: "0.95rem", lineHeight: 1.7, marginBottom: 40, maxWidth: "540px" }}>
+          I build high-performance mobile architectures, scalable cloud infrastructure, and predictive data pipelines. Let's merge intelligent analytics with flawless UI/UX.
+        </p>
+
+        {/* Social badging */}
+        <div style={{ display: "flex", gap: "16px" }}>
+          {[
+            { icon: <GithubIcon size={18} />, href: "https://github.com/Jana-06", label: "GitHub" },
+            { icon: <LinkedinIcon size={18} />, href: "https://linkedin.com/in/janarthan-s-8476b81b5", label: "LinkedIn" },
+            { icon: <ExternalLink size={18} />, href: "https://portfoliojanarthanx.vercel.app", label: "Portfolio" }
+          ].map((soc, idx) => (
+            <motion.a
+              key={idx}
+              href={soc.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="glass-sm"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "10px 18px",
+                color: "#ffffff",
+                textDecoration: "none",
+                fontSize: "0.8rem",
+                fontWeight: 500,
+                border: "1px solid rgba(255,255,255,0.12)"
+              }}
+              whileHover={{
+                scale: 1.05,
+                borderColor: "rgba(255,255,255,0.35)",
+                background: "rgba(255,255,255,0.1)"
+              }}
+              transition={{ duration: 0.2 }}
+            >
+              {soc.icon} {soc.label}
+            </motion.a>
+          ))}
+        </div>
+      </div>
+
+      {/* Hero Right Code Block */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, rotateY: 10 }}
+        animate={isActive ? { opacity: 1, scale: 1, rotateY: 0 } : { opacity: 0 }}
+        transition={{ duration: 0.8, delay: 0.1 }}
+        className="glass"
+        style={{
+          padding: "32px",
+          fontFamily: "Fira Code, SFMono-Regular, Consolas, monospace",
+          fontSize: "0.8rem",
+          lineHeight: "1.8",
+          border: "1px solid rgba(255,255,255,0.08)",
+          transformStyle: "preserve-3d",
+          boxShadow: "0 20px 40px rgba(0,0,0,0.5)"
+        }}
+      >
+        <div style={{ color: "rgba(99, 102, 241, 0.85)" }}>{"// Developer Archetype"}</div>
+        <div style={{ color: "#ffffff", marginTop: 8 }}>
+          <span style={{ color: "#f472b6" }}>const</span> engineer = {"{"}
+        </div>
+        <div style={{ paddingLeft: "16px" }}>
+          <div>name: <span style={{ color: "#a5b4fc" }}>"Janarthan S"</span>,</div>
+          <div>coreStack: <span style={{ color: "#4ade80" }}>["Android", "React", "Python"]</span>,</div>
+          <div>specialties: <span style={{ color: "#4ade80" }}>["ML & AI Integration", "APIs"]</span>,</div>
+          <div>philosophy: <span style={{ color: "#a5b4fc" }}>"Scale meets simplicity"</span>,</div>
+          <div>status: <span style={{ color: "#4ade80" }}>"Active"</span></div>
+        </div>
+        <div style={{ color: "#ffffff" }}>{"};"}</div>
+
+        <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", marginTop: "24px", paddingTop: "20px" }}>
+          <div style={{ color: "rgba(244, 114, 182, 0.7)" }}>{"// Active Learning Pipeline"}</div>
+          <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.5)" }}>
+            Currently refining real-time recommendation engines and offline-first mobile databases.
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 2: CAPABILITIES & SERVICES ─── */
+function ServicesSlide({ isActive }) {
+  const services = [
+    {
+      icon: <Code2 size={20} />,
+      title: "Full-Stack Web Engineering",
+      desc: "Architecting high-performance React architectures synced with fast, asynchronous backend APIs (Node, FastAPI) and relational storage."
+    },
+    {
+      icon: <BarChart3 size={20} />,
+      title: "Data Science & Machine Learning",
+      desc: "Engineering predictive analytical models, personalized recommendation systems, and robust forecasting pipelines using Python, SciKit-Learn, and XGBoost."
+    },
+    {
+      icon: <Zap size={20} />,
+      title: "Mobile Architecture & Native Apps",
+      desc: "Crafting fluid, responsive cross-platform architectures with Flutter or high-performance native Android experiences, prioritizing local-first data caching."
+    },
+    {
+      icon: <Brain size={20} />,
+      title: "AI Integration & Pipelines",
+      desc: "Seamless integration of Large Language Models (LLMs), vector databases, and semantic search frameworks directly into production web architectures."
+    }
+  ];
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", height: "100%", width: "100%" }}>
+      <div style={{ marginBottom: "40px" }}>
+        <span className="label">Capabilities</span>
+        <h2 className="display" style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 700, marginTop: "8px" }}>
+          Engineering Design & Deployment
+        </h2>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "20px" }}>
+        {services.map((serv, idx) => (
+          <motion.div
+            key={idx}
+            className="glass card-hover-3d"
+            style={{ padding: "28px" }}
+            initial={{ opacity: 0, y: 15 }}
+            animate={isActive ? { opacity: 1, y: 0 } : { opacity: 0 }}
+            transition={{ duration: 0.5, delay: idx * 0.08 }}
+          >
+            <div style={{
+              width: "42px",
+              height: "42px",
+              borderRadius: "10px",
+              background: "rgba(99, 102, 241, 0.15)",
+              border: "1px solid rgba(99, 102, 241, 0.3)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: "16px",
+              color: "#c084fc"
+            }}>
+              {serv.icon}
+            </div>
+            <h3 className="heading" style={{ fontSize: "1.05rem", fontWeight: 600, marginBottom: "8px" }}>
+              {serv.title}
+            </h3>
+            <p className="muted" style={{ fontSize: "0.82rem", lineHeight: "1.6" }}>
+              {serv.desc}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 3: PROJECTS SHOWCASE ─── */
+function ProjectsSlide({ isActive }) {
+  /* ===================================================================
+     PLACEHOLDER: EDIT YOUR PROJECT DETAILS HERE (Add/Modify items below)
+     =================================================================== */
+  const projects = [
+    {
+      num: "01",
+      emoji: "🏹",
+      title: "Hack'n'Hunt",
+      desc: "A highly collaborative event management framework running synchronized real-time web databases for team coordinate hunting.",
+      tech: "React • Node.js • Firebase Realtime DB",
+      gradient: "linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(236,72,153,0.05) 100%)"
+    },
+    {
+      num: "02",
+      emoji: "🛒",
+      title: "SmartCart ML Engine",
+      desc: "An intelligent personalized recommendation engine utilizing machine learning classifiers to predict purchase intent in real-time.",
+      tech: "Python • Scikit-learn • FastAPI",
+      gradient: "linear-gradient(135deg, rgba(192,132,252,0.1) 0%, rgba(99,102,241,0.05) 100%)"
+    },
+    {
+      num: "03",
+      emoji: "🛍️",
+      title: "Flutter E-Commerce",
+      desc: "Cross-platform mobile store architected with offline-first support, featuring beautiful fluid transition animations.",
+      tech: "Flutter • Bloc Pattern • Hive Cache",
+      gradient: "linear-gradient(135deg, rgba(236,72,153,0.1) 0%, rgba(192,132,252,0.05) 100%)"
+    },
+    {
+      num: "04",
+      emoji: "📈",
+      title: "Demand Forecaster",
+      desc: "Deep statistical predictive pipeline forecasting inventory requirements with over 94% validation accuracy.",
+      tech: "Python • TensorFlow • PostgreSQL",
+      gradient: "linear-gradient(135deg, rgba(74,222,128,0.08) 0%, rgba(99,102,241,0.05) 100%)"
+    }
+  ];
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", height: "100%", width: "100%" }}>
+      <div style={{ marginBottom: "32px", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+        <div>
+          <span className="label">Featured Artifacts</span>
+          <h2 className="display" style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 700, marginTop: "8px" }}>
+            The Works Gallery
+          </h2>
+        </div>
+        <span className="label" style={{ paddingBottom: "6px" }}>Slide to Navigate</span>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "20px" }}>
+        {projects.map((proj, idx) => (
+          <motion.div
+            key={idx}
+            className="project-card card-hover-3d"
+            style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "16px" }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={isActive ? { opacity: 1, scale: 1 } : { opacity: 0 }}
+            transition={{ duration: 0.4, delay: idx * 0.08 }}
+          >
+            {/* Project Cover Block */}
+            <div style={{
+              width: "100%",
+              height: "120px",
+              background: proj.gradient,
+              borderRadius: "10px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              border: "1px solid rgba(255,255,255,0.03)"
+            }}>
+              <span style={{ fontSize: "2.5rem", filter: "drop-shadow(0 8px 12px rgba(0,0,0,0.35))" }}>
+                {proj.emoji}
+              </span>
+            </div>
+
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                <span className="label" style={{ color: "#c084fc", fontSize: "0.6rem" }}>Project {proj.num}</span>
+                <span className="label" style={{ fontSize: "0.6rem", opacity: 0.35 }}>{proj.tech.split("•")[0]}</span>
+              </div>
+              <h3 className="heading" style={{ fontSize: "1.05rem", fontWeight: 600, marginBottom: "6px" }}>
+                {proj.title}
+              </h3>
+              <p className="muted" style={{ fontSize: "0.8rem", lineHeight: "1.5", height: "45px", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {proj.desc}
+              </p>
+              <div className="label" style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.55rem", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "8px", marginTop: "8px" }}>
+                {proj.tech}
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 4: TECHNICAL MANIFESTO ─── */
+function ManifestoSlide({ isActive }) {
+  const pillars = [
+    {
+      num: "01",
+      title: "Purpose-Driven Motion",
+      desc: "Every dynamic animation must clarify information, structural relations, and flow. I use Framer Motion to craft high-fidelity, polished, and intent-focused interactions."
+    },
+    {
+      num: "02",
+      title: "Scalable Architecture",
+      desc: "Clean code structure, modular design patterns, and solid engineering foundations come first. Prioritizing structured modularity, React hooks, and strict typings."
+    },
+    {
+      num: "03",
+      title: "Analytical Integrity",
+      desc: "We live in a data-rich age. Integrating predictive algorithms, anomaly alerts, and recommendation modules directly creates smart, business-savvy software applications."
+    },
+    {
+      num: "04",
+      title: "Future-Ready Integration",
+      desc: "Unlocking advanced paradigms with vector indexing, neural caching, and natural language embeddings. Bridging the threshold between active AI models and standard UI interfaces."
+    }
+  ];
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", height: "100%", width: "100%" }}>
+      <div style={{ marginBottom: "40px" }}>
+        <span className="label">Philosophy</span>
+        <h2 className="display" style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 700, marginTop: "8px" }}>
+          Technical Manifesto
+        </h2>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "20px" }}>
+        {pillars.map((pil, idx) => (
+          <motion.div
+            key={idx}
+            className="glass"
+            style={{ padding: "30px", display: "flex", flexDirection: "column", gap: "12px" }}
+            initial={{ opacity: 0, y: 15 }}
+            animate={isActive ? { opacity: 1, y: 0 } : { opacity: 0 }}
+            transition={{ duration: 0.5, delay: idx * 0.08 }}
+            whileHover={{ y: -4, borderColor: "rgba(255,255,255,0.18)" }}
+          >
+            <div className="label" style={{ color: "#ec4899", fontSize: "0.7rem", fontWeight: 700 }}>
+              {pil.num}
+            </div>
+            <h3 className="heading" style={{ fontSize: "1.05rem", fontWeight: 600 }}>
+              {pil.title}
+            </h3>
+            <p className="muted" style={{ fontSize: "0.82rem", lineHeight: "1.6" }}>
+              {pil.desc}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── SLIDE 5: CTA / CONTACT ─── */
+function ContactSlide({ isActive }) {
+  const [copied, setCopied] = useState(false);
+  const emailAddress = "l0cjanarthansrvspm@gmail.com";
+
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText(emailAddress);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%", width: "100%" }}>
+      {/* Centered CTA Block */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flexGrow: 1, textAlign: "center", padding: "0 20px" }}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={isActive ? { opacity: 1, scale: 1 } : { opacity: 0 }}
+          transition={{ duration: 0.6 }}
+          className="glass"
+          style={{
+            padding: "48px 60px",
+            borderRadius: "24px",
+            maxWidth: "760px",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            boxShadow: "0 20px 50px rgba(0,0,0,0.6)"
+          }}
+        >
+          <span className="label" style={{ color: "#c084fc", marginBottom: "16px", display: "inline-block" }}>
+            Let's Collaborate
+          </span>
+          <h2 className="display" style={{ fontSize: "clamp(2rem, 5vw, 3.2rem)", fontWeight: 700, lineHeight: 1.15, marginBottom: "20px" }}>
+            Let's Build Something Exceptional.
+          </h2>
+          <p className="muted" style={{ fontSize: "0.9rem", lineHeight: "1.7", marginBottom: "32px", maxWidth: "560px", margin: "0 auto 32px auto" }}>
+            Whether you have an intricate custom software problem or an inspiring digital product plan, I would love to join forces to launch it.
+          </p>
+
+          <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap" }}>
+            <motion.a
+              href={`mailto:${emailAddress}`}
+              className="btn-white"
+              whileTap={{ scale: 0.97 }}
+            >
+              Get In Touch <Mail size={16} />
+            </motion.a>
+
+            <motion.button
+              onClick={handleCopyEmail}
+              className="btn-glass"
+              style={{ minWidth: "155px" }}
+              whileTap={{ scale: 0.97 }}
+            >
+              {copied ? (
+                <>
+                  Copied! <Check size={16} style={{ color: "#4ade80" }} />
+                </>
+              ) : (
+                <>
+                  Copy Email <Mail size={16} />
+                </>
+              )}
+            </motion.button>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Elegant Slide Footer */}
+      <footer style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "24px", paddingBottom: "10px", width: "100%" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+          <div>
+            <span className="heading" style={{ fontSize: "1.1rem", fontWeight: 700, letterSpacing: "0.05em" }}>Janarthan S</span>
+            <p className="label" style={{ fontSize: "0.55rem", marginTop: "4px" }}>Engineer • Designer • Data Scientist</p>
+          </div>
+          <div style={{ display: "flex", gap: "24px" }}>
+            <a href="https://github.com/Jana-06" target="_blank" rel="noopener noreferrer" className="label" style={{ textDecoration: "none", fontSize: "0.6rem" }}>
+              GitHub
+            </a>
+            <a href="https://linkedin.com/in/janarthan-s-8476b81b5" target="_blank" rel="noopener noreferrer" className="label" style={{ textDecoration: "none", fontSize: "0.6rem" }}>
+              LinkedIn
+            </a>
+          </div>
+          <div className="label" style={{ fontSize: "0.55rem", opacity: 0.35 }}>
+            &copy; 2026 Janarthan S. All rights reserved.
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+/* ─── MAIN PORTFOLIO COMPONENT ─── */
+const SLIDES = [HeroSlide, ServicesSlide, ProjectsSlide, ManifestoSlide, ContactSlide];
+const SLIDE_LABELS = ["Intro", "Capabilities", "Projects", "Philosophy", "Collaborate"];
+
+export default function App() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Resize listener to adapt gracefully to mobile viewports
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Keyboard navigation support
+  useEffect(() => {
+    if (isMobile) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "ArrowRight") {
+        nextSlide();
+      } else if (e.key === "ArrowLeft") {
+        prevSlide();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentSlide, isMobile]);
+
+  // Touch Swipe Gesture Detectors for mobile/tablet sliding
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    const diffX = touchStartX.current - touchEndX.current;
+    if (Math.abs(diffX) > 60) {
+      if (diffX > 0) {
+        nextSlide();
+      } else {
+        prevSlide();
+      }
+    }
+    touchStartX.current = 0;
+    touchEndX.current = 0;
+  };
+
+  const nextSlide = () => {
+    if (currentSlide < SLIDES.length - 1) {
+      setDirection(1);
+      setCurrentSlide((prev) => prev + 1);
+    }
+  };
+
+  const prevSlide = () => {
+    if (currentSlide > 0) {
+      setDirection(-1);
+      setCurrentSlide((prev) => prev - 1);
+    }
+  };
+
+  return (
+    <div
+      className="grain"
+      style={{
+        background: "#000000",
+        minHeight: "100vh",
+        position: "relative",
+        overflow: isMobile ? "auto" : "hidden"
+      }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       <BackgroundVideo />
 
-      {/* Content */}
+      {/* Main Container Layer */}
       <div style={{ position: "relative", zIndex: 10 }}>
-        <Navbar/>
-        <Hero/>
-        <About/>
-        <Projects/>
-        <Manifesto/>
-        <CTA/>
-        <Footer/>
+        {/* Header Header */}
+        <header
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 100,
+            padding: isMobile ? "16px 20px" : "24px 48px",
+            background: "linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, transparent 100%)",
+            backdropFilter: "blur(8px)"
+          }}
+        >
+          <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div
+              className="heading"
+              style={{
+                fontSize: "1.25rem",
+                fontWeight: 800,
+                letterSpacing: "0.08em",
+                background: "linear-gradient(to right, #ffffff 50%, rgba(255,255,255,0.4) 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent"
+              }}
+            >
+              J.S
+            </div>
+
+            {/* Premium Pagination Indicator bullets on Desktop */}
+            {!isMobile && (
+              <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
+                {SLIDE_LABELS.map((label, idx) => (
+                  <div
+                    key={idx}
+                    className={`bullet-ring ${currentSlide === idx ? "active" : ""}`}
+                    onClick={() => {
+                      setDirection(idx > currentSlide ? 1 : -1);
+                      setCurrentSlide(idx);
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "6px",
+                        height: "6px",
+                        borderRadius: "50%",
+                        background: currentSlide === idx ? "#ffffff" : "rgba(255,255,255,0.35)",
+                        transition: "background 0.3s ease, transform 0.3s ease",
+                        transform: currentSlide === idx ? "scale(1.2)" : "scale(1)"
+                      }}
+                    />
+                    {currentSlide === idx && (
+                      <span
+                        className="label"
+                        style={{
+                          position: "absolute",
+                          top: "28px",
+                          fontSize: "0.5rem",
+                          letterSpacing: "0.15em",
+                          whiteSpace: "nowrap",
+                          color: "#ffffff"
+                        }}
+                      >
+                        {label}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <a href="mailto:l0cjanarthansrvspm@gmail.com" className="btn-glass" style={{ padding: "8px 20px", fontSize: "0.75rem" }}>
+              <Mail size={13} /> Get in Touch
+            </a>
+          </div>
+        </header>
+
+        {/* Dynamic 3D Card Deck View on Desktop vs Stacked Scroll View on Mobile */}
+        {isMobile ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: "60px", padding: "100px 20px 40px 20px", maxWidth: "800px", margin: "0 auto" }}>
+            {SLIDES.map((SlideComponent, idx) => (
+              <div key={idx} className="slide-container-mobile" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "40px" }}>
+                <SlideComponent isActive={true} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="perspective-container">
+            <main className="preserve-3d" style={{ position: "relative", width: "90vw", maxWidth: "1300px", height: "76vh", display: "flex", alignItems: "center", justifyContent: "center", transformStyle: "preserve-3d" }}>
+              {SLIDES.map((SlideComponent, idx) => {
+                const offset = idx - currentSlide;
+                let transform = "";
+                let opacity = 0;
+                let pointerEvents = "none";
+
+                if (offset === 0) {
+                  transform = "translateZ(0) rotateY(0deg) scale(1)";
+                  opacity = 1;
+                  pointerEvents = "auto";
+                } else if (offset === 1) {
+                  transform = "translateZ(-300px) translateX(65%) rotateY(-20deg) scale(0.85)";
+                  opacity = 0.35;
+                } else if (offset === -1) {
+                  transform = "translateZ(-300px) translateX(-65%) rotateY(20deg) scale(0.85)";
+                  opacity = 0.35;
+                } else if (offset > 1) {
+                  transform = "translateZ(-600px) translateX(120%) rotateY(-35deg) scale(0.7)";
+                  opacity = 0;
+                } else if (offset < -1) {
+                  transform = "translateZ(-600px) translateX(-120%) rotateY(35deg) scale(0.7)";
+                  opacity = 0;
+                }
+
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      position: "absolute",
+                      width: "100%",
+                      height: "100%",
+                      transition: "all 0.8s cubic-bezier(0.165, 0.84, 0.44, 1)",
+                      transform,
+                      opacity,
+                      pointerEvents,
+                      display: "flex",
+                      flexDirection: "column"
+                    }}
+                  >
+                    <SlideComponent isActive={offset === 0} />
+                  </div>
+                );
+              })}
+            </main>
+
+            {/* Bottom Floating Navigation Buttons for Desktop */}
+            <div style={{ position: "absolute", bottom: "32px", right: "48px", display: "flex", gap: "16px", zIndex: 100 }}>
+              <button
+                onClick={prevSlide}
+                disabled={currentSlide === 0}
+                style={{
+                  background: "rgba(255, 255, 255, 0.04)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  borderRadius: "50%",
+                  width: "48px",
+                  height: "48px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#ffffff",
+                  cursor: currentSlide === 0 ? "not-allowed" : "pointer",
+                  opacity: currentSlide === 0 ? 0.25 : 1,
+                  transition: "all 0.3s ease",
+                  backdropFilter: "blur(12px)"
+                }}
+                className="btn-glass"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button
+                onClick={nextSlide}
+                disabled={currentSlide === SLIDES.length - 1}
+                style={{
+                  background: "rgba(255, 255, 255, 0.04)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  borderRadius: "50%",
+                  width: "48px",
+                  height: "48px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#ffffff",
+                  cursor: currentSlide === SLIDES.length - 1 ? "not-allowed" : "pointer",
+                  opacity: currentSlide === SLIDES.length - 1 ? 0.25 : 1,
+                  transition: "all 0.3s ease",
+                  backdropFilter: "blur(12px)"
+                }}
+                className="btn-glass"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+
+            {/* Bottom-Left Keyboard Helper Label */}
+            <div
+              className="label"
+              style={{
+                position: "absolute",
+                bottom: "44px",
+                left: "48px",
+                fontSize: "0.55rem",
+                opacity: 0.4,
+                letterSpacing: "0.15em"
+              }}
+            >
+              Use &larr; &rarr; Arrow Keys To Navigate
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
